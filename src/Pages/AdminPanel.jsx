@@ -3,6 +3,7 @@ import { FaUser, FaCogs, FaTasks, FaToolbox, FaBriefcase, FaBuilding } from 'rea
 import UsersTable from './UsersTable';
 import ProcessesTable from './ProcessesTable';
 import TasksTable from './TasksTable';
+import FunctionsTable from './FunctionsTable';
 
 
 const AdminPanel = () => {
@@ -63,7 +64,7 @@ const AdminPanel = () => {
         {selectedMenu === 'users' && <UsersTable />}
         {selectedMenu === 'processes' && <ProcessesTable />}
         {selectedMenu === 'tasks' && <TasksTable />}
-        {selectedMenu === 'functions' && <h2>Functions Content</h2>}
+        {selectedMenu === 'functions' && <FunctionsTable />}
         {selectedMenu === 'jobs' && <h2>Jobs Content</h2>}
         {selectedMenu === 'buildings' && <h2>Buildings Content</h2>}
       </main>
