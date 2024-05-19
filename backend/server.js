@@ -192,6 +192,47 @@ app.delete('/rooms/:id', (req, res) => {
 });
 
 
+// Create a function
+app.post('/functions', (req, res) => {
+  const { name, description, type } = req.body;
+  const sql = 'INSERT INTO functions (name, description, type) VALUES (?, ?, ?)';
+  db.query(sql, [name, description, type], (err, result) => {
+    if (err) throw err;
+    res.json({ id: result.insertId, name, description, type });
+  });
+});
+
+// Get all functions
+app.get('/functions', (req, res) => {
+  const sql = 'SELECT * FROM functions';
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+// Update a function
+app.put('/functions/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, description, type } = req.body;
+  const sql = 'UPDATE functions SET name = ?, description = ?, type = ? WHERE id = ?';
+  db.query(sql, [name, description, type, id], (err, result) => {
+    if (err) throw err;
+    res.json({ id, name, description, type });
+  });
+});
+
+// Delete a function
+app.delete('/functions/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = 'DELETE FROM functions WHERE id = ?';
+  db.query(sql, [id], (err, result) => {
+    if (err) throw err;
+    res.json({ id });
+  });
+});
+
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

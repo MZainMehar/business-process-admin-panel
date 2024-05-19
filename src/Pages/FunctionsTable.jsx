@@ -1,20 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const FunctionsTable = () => {
   const [functions, setFunctions] = useState([]);
-  const [formData, setFormData] = useState({ id: null, name: '', description: '', type: '' });
+  const [formData, setFormData] = useState({ name: '', description: '', type: '' });
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    fetchFunctions();
+  }, []);
+
+  const fetchFunctions = async () => {
+    try {
+      const response = await axios.get('/functions');
+      setFunctions(response.data);
+    } catch (error) {
+      console.error('Error fetching functions:', error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleAddFunction = (e) => {
+  const handleAddFunction = async (e) => {
     e.preventDefault();
-    const newFunction = { ...formData, id: functions.length + 1 };
-    setFunctions([...functions, newFunction]);
-    setFormData({ id: null, name: '', description: '', type: '' });
+    try {
+      await axios.post('/functions', formData);
+      fetchFunctions();
+      setFormData({ name: '', description: '', type: '' });
+    } catch (error) {
+      console.error('Error adding function:', error);
+    }
   };
 
   const handleEditFunction = (func) => {
@@ -22,15 +40,25 @@ const FunctionsTable = () => {
     setFormData(func);
   };
 
-  const handleUpdateFunction = (e) => {
+  const handleUpdateFunction = async (e) => {
     e.preventDefault();
-    setFunctions(functions.map(f => f.id === formData.id ? formData : f));
-    setIsEditing(false);
-    setFormData({ id: null, name: '', description: '', type: '' });
+    try {
+      await axios.put(`/functions/${formData.id}`, formData);
+      fetchFunctions();
+      setIsEditing(false);
+      setFormData({ name: '', description: '', type: '' });
+    } catch (error) {
+      console.error('Error updating function:', error);
+    }
   };
 
-  const handleDeleteFunction = (id) => {
-    setFunctions(functions.filter(f => f.id !== id));
+  const handleDeleteFunction = async (id) => {
+    try {
+      await axios.delete(`/functions/${id}`);
+      fetchFunctions();
+    } catch (error) {
+      console.error('Error deleting function:', error);
+    }
   };
 
   return (
@@ -82,7 +110,7 @@ const FunctionsTable = () => {
           </tr>
         </thead>
         <tbody>
-          {functions.map(func => (
+          {Array.isArray(functions) && functions.map(func => (
             <tr key={func.id} className="text-center">
               <td className="py-2 px-4 border-b">{func.name}</td>
               <td className="py-2 px-4 border-b">{func.description}</td>
