@@ -1,20 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const TasksTable = () => {
   const [tasks, setTasks] = useState([]);
-  const [formData, setFormData] = useState({ id: null, name: '', description: '', deadline: '' });
+  const [formData, setFormData] = useState({ id: null, name: '', description: '' });
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/tasks');
+      setTasks(response.data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleAddTask = (e) => {
+  const handleAddTask = async (e) => {
     e.preventDefault();
-    const newTask = { ...formData, id: tasks.length + 1 };
-    setTasks([...tasks, newTask]);
-    setFormData({ id: null, name: '', description: '', deadline: '' });
+    try {
+      const response = await axios.post('http://localhost:5000/tasks', formData);
+      setTasks([...tasks, response.data]);
+      setFormData({ id: null, name: '', description: '' });
+    } catch (error) {
+      console.error('Error adding task:', error);
+    }
   };
 
   const handleEditTask = (task) => {
@@ -22,15 +40,25 @@ const TasksTable = () => {
     setFormData(task);
   };
 
-  const handleUpdateTask = (e) => {
+  const handleUpdateTask = async (e) => {
     e.preventDefault();
-    setTasks(tasks.map(tsk => tsk.id === formData.id ? formData : tsk));
-    setIsEditing(false);
-    setFormData({ id: null, name: '', description: '', deadline: '' });
+    try {
+      await axios.put(`http://localhost:5000/tasks/${formData.id}`, formData);
+      setTasks(tasks.map(tsk => tsk.id === formData.id ? formData : tsk));
+      setIsEditing(false);
+      setFormData({ id: null, name: '', description: '' });
+    } catch (error) {
+      console.error('Error updating task:', error);
+    }
   };
 
-  const handleDeleteTask = (id) => {
-    setTasks(tasks.filter(tsk => tsk.id !== id));
+  const handleDeleteTask = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/tasks/${id}`);
+      setTasks(tasks.filter(tsk => tsk.id !== id));
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
   };
 
   return (
@@ -38,7 +66,7 @@ const TasksTable = () => {
       <h2 className="text-2xl font-bold mb-4">Tasks</h2>
 
       <form onSubmit={isEditing ? handleUpdateTask : handleAddTask} className="mb-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <input
             type="text"
             name="name"
@@ -57,15 +85,6 @@ const TasksTable = () => {
             className="p-2 border rounded"
             required
           />
-          <input
-            type="date"
-            name="deadline"
-            value={formData.deadline}
-            onChange={handleInputChange}
-            placeholder="Deadline"
-            className="p-2 border rounded"
-            required
-          />
           <button type="submit" className="p-2 bg-blue-500 text-white rounded">
             {isEditing ? 'Update' : 'Add'}
           </button>
@@ -77,7 +96,6 @@ const TasksTable = () => {
           <tr>
             <th className="py-2 px-4 border-b">Name</th>
             <th className="py-2 px-4 border-b">Description</th>
-            <th className="py-2 px-4 border-b">Deadline</th>
             <th className="py-2 px-4 border-b">Actions</th>
           </tr>
         </thead>
@@ -86,7 +104,6 @@ const TasksTable = () => {
             <tr key={task.id} className="text-center">
               <td className="py-2 px-4 border-b">{task.name}</td>
               <td className="py-2 px-4 border-b">{task.description}</td>
-              <td className="py-2 px-4 border-b">{task.deadline}</td>
               <td className="py-2 px-4 border-b">
                 <button
                   className="text-green-500 hover:underline mr-2"

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { FaUser, FaCogs, FaTasks, FaToolbox, FaBriefcase, FaBuilding } from 'react-icons/fa';
+import { MdAirlineSeatFlat } from "react-icons/md";
+import { PiSuitcaseSimpleFill } from "react-icons/pi";
 import UsersTable from './UsersTable';
 import ProcessesTable from './ProcessesTable';
 import TasksTable from './TasksTable';
 import FunctionsTable from './FunctionsTable';
+import RoomsTable from './RoomsTable';
+import JobsTable from './JobsTable';
 
 
 const AdminPanel = () => {
@@ -58,6 +62,13 @@ const AdminPanel = () => {
           >
             <FaBuilding className="mr-3" /> Buildings
           </a>
+          <a
+            href="#rooms"
+            onClick={() => setSelectedMenu('rooms')}
+            className={`flex items-center p-2 text-gray-300 hover:bg-gray-700 rounded ${selectedMenu === 'rooms' && 'bg-gray-700'}`}
+          >
+            <MdAirlineSeatFlat className="mr-3" /> Rooms
+          </a>
         </nav>
       </div>
       <main className="flex-1 p-4 bg-gray-100 overflow-auto">
@@ -65,8 +76,9 @@ const AdminPanel = () => {
         {selectedMenu === 'processes' && <ProcessesTable />}
         {selectedMenu === 'tasks' && <TasksTable />}
         {selectedMenu === 'functions' && <FunctionsTable />}
-        {selectedMenu === 'jobs' && <h2>Jobs Content</h2>}
+        {selectedMenu === 'jobs' && <JobsTable />}
         {selectedMenu === 'buildings' && <h2>Buildings Content</h2>}
+        {selectedMenu === 'rooms' && <RoomsTable />}
       </main>
     </div>
   );

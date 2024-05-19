@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const UsersTable = () => {
   const [users, setUsers] = useState([]);
-
-  const [formData, setFormData] = useState({ id: null, name: '', username: '', processes: '' });
+  const [formData, setFormData] = useState({ id: null, name: '', username: '', password: '', score: '' });
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/users')
+      .then(response => setUsers(response.data))
+      .catch(error => console.error(error));
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -13,9 +19,12 @@ const UsersTable = () => {
 
   const handleAddUser = (e) => {
     e.preventDefault();
-    const newUser = { ...formData, id: users.length + 1 };
-    setUsers([...users, newUser]);
-    setFormData({ id: null, name: '', username: '', processes: '' });
+    axios.post('http://localhost:5000/users', formData)
+      .then(response => {
+        setUsers([...users, response.data]);
+        setFormData({ id: null, name: '', username: '', password: '', score: '' });
+      })
+      .catch(error => console.error(error));
   };
 
   const handleEditUser = (user) => {
@@ -25,13 +34,21 @@ const UsersTable = () => {
 
   const handleUpdateUser = (e) => {
     e.preventDefault();
-    setUsers(users.map(user => user.id === formData.id ? formData : user));
-    setIsEditing(false);
-    setFormData({ id: null, name: '', username: '', processes: '' });
+    axios.put(`http://localhost:5000/users/${formData.id}`, formData)
+      .then(response => {
+        setUsers(users.map(user => user.id === formData.id ? response.data : user));
+        setIsEditing(false);
+        setFormData({ id: null, name: '', username: '', password: '', score: '' });
+      })
+      .catch(error => console.error(error));
   };
 
   const handleDeleteUser = (id) => {
-    setUsers(users.filter(user => user.id !== id));
+    axios.delete(`http://localhost:5000/users/${id}`)
+      .then(response => {
+        setUsers(users.filter(user => user.id !== id));
+      })
+      .catch(error => console.error(error));
   };
 
   return (
@@ -59,11 +76,20 @@ const UsersTable = () => {
             required
           />
           <input
-            type="text"
-            name="processes"
-            value={formData.processes}
+            type="password"
+            name="password"
+            value={formData.password}
             onChange={handleInputChange}
-            placeholder="Processes"
+            placeholder="Password"
+            className="p-2 border rounded"
+            required
+          />
+          <input
+            type="number"
+            name="score"
+            value={formData.score}
+            onChange={handleInputChange}
+            placeholder="Score"
             className="p-2 border rounded"
             required
           />
@@ -78,7 +104,8 @@ const UsersTable = () => {
           <tr>
             <th className="py-2 px-4 border-b">Name</th>
             <th className="py-2 px-4 border-b">Username</th>
-            <th className="py-2 px-4 border-b">Processes</th>
+            <th className="py-2 px-4 border-b">Password</th>
+            <th className="py-2 px-4 border-b">Score</th>
             <th className="py-2 px-4 border-b">Actions</th>
           </tr>
         </thead>
@@ -87,7 +114,8 @@ const UsersTable = () => {
             <tr key={user.id} className="text-center">
               <td className="py-2 px-4 border-b">{user.name}</td>
               <td className="py-2 px-4 border-b">{user.username}</td>
-              <td className="py-2 px-4 border-b">{user.processes}</td>
+              <td className="py-2 px-4 border-b">{user.password}</td>
+              <td className="py-2 px-4 border-b">{user.score}</td>
               <td className="py-2 px-4 border-b">
                 <button
                   className="text-green-500 hover:underline mr-2"
