@@ -3,11 +3,15 @@ import axios from 'axios';
 
 const RoomsTable = () => {
   const [rooms, setRooms] = useState([]);
-  const [formData, setFormData] = useState({ id: null, roomNumber: '', floorId: '', roomName: '', roomDescription: '' });
+  const [jobs, setJobs] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [formData, setFormData] = useState({ id: null, roomNumber: '', floorId: '', roomName: '', jobName: '', taskName: '' });
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetchRooms();
+    fetchJobs();
+    fetchTasks();
   }, []);
 
   const fetchRooms = async () => {
@@ -16,6 +20,24 @@ const RoomsTable = () => {
       setRooms(response.data);
     } catch (error) {
       console.error('Error fetching rooms:', error);
+    }
+  };
+
+  const fetchJobs = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/jobNames');
+      setJobs(response.data);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+    }
+  };
+
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/taskName');
+      setTasks(response.data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
     }
   };
 
@@ -29,7 +51,7 @@ const RoomsTable = () => {
     try {
       const response = await axios.post('http://localhost:5000/rooms', formData);
       setRooms([...rooms, response.data]);
-      setFormData({ id: null, roomNumber: '', floorId: '', roomName: '', roomDescription: '' });
+      setFormData({ id: null, roomNumber: '', floorId: '', roomName: '', jobName: '' });
     } catch (error) {
       console.error('Error adding room:', error);
     }
@@ -46,7 +68,7 @@ const RoomsTable = () => {
       await axios.put(`http://localhost:5000/rooms/${formData.id}`, formData);
       setRooms(rooms.map(rm => rm.id === formData.id ? formData : rm));
       setIsEditing(false);
-      setFormData({ id: null, roomNumber: '', floorId: '', roomName: '', roomDescription: '' });
+      setFormData({ id: null, roomNumber: '', floorId: '', roomName: '', jobName: '' });
     } catch (error) {
       console.error('Error updating room:', error);
     }
@@ -94,15 +116,34 @@ const RoomsTable = () => {
             className="p-2 border rounded"
             required
           />
-          <input
-            type="text"
-            name="roomDescription"
-            value={formData.roomDescription}
+          <select
+            name="jobName"
+            value={formData.jobName}
             onChange={handleInputChange}
-            placeholder="Room Description"
-            className="p-2 border rounded"
+            className='p-2 border rounded'
             required
-          />
+          >
+            <option value="">Select Job</option>
+            {jobs.map(job => (
+              <option key={job.id} value={job.id}>
+                {job.jobName}
+              </option>
+            ))}
+          </select>
+          <select
+            name="taskName"
+            value={formData.taskName}
+            onChange={handleInputChange}
+            className='p-2 border rounded'
+            required
+          >
+            <option value="">Select Task</option>
+            {tasks.map(task => (
+              <option key={task.id} value={task.id}>
+                {task.taskName}
+              </option>
+            ))}
+          </select>
           <button type="submit" className="p-2 bg-blue-500 text-white rounded">
             {isEditing ? 'Update' : 'Add'}
           </button>
@@ -115,7 +156,8 @@ const RoomsTable = () => {
             <th className="py-2 px-4 border-b">Room Number</th>
             <th className="py-2 px-4 border-b">Floor ID</th>
             <th className="py-2 px-4 border-b">Room Name</th>
-            <th className="py-2 px-4 border-b">Room Description</th>
+            <th className="py-2 px-4 border-b">Job</th>
+            <th className="py-2 px-4 border-b">Task</th>
             <th className="py-2 px-4 border-b">Actions</th>
           </tr>
         </thead>
@@ -125,7 +167,8 @@ const RoomsTable = () => {
               <td className="py-2 px-4 border-b">{room.roomNumber}</td>
               <td className="py-2 px-4 border-b">{room.floorId}</td>
               <td className="py-2 px-4 border-b">{room.roomName}</td>
-              <td className="py-2 px-4 border-b">{room.roomDescription}</td>
+              <td className="py-2 px-4 border-b">{room.jobName}</td>
+              <td className="py-2 px-4 border-b">{room.taskName}</td>
               <td className="py-2 px-4 border-b">
                 <button
                   className="text-green-500 hover:underline mr-2"

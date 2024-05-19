@@ -111,6 +111,24 @@ app.get('/rooms', (req, res) => {
   });
 });
 
+// Get all process names
+app.get('/processesNames', (req, res) => {
+  const sql = 'SELECT name FROM processes';
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+// Get all Job names
+app.get('/jobNames', (req, res) => {
+  const sql = 'SELECT jobName FROM jobs';
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
 // Create a task
 app.post('/tasks', (req, res) => {
   const { name, description } = req.body;
@@ -124,6 +142,16 @@ app.post('/tasks', (req, res) => {
 // Get all tasks
 app.get('/tasks', (req, res) => {
   const sql = 'SELECT * FROM tasks';
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+
+// Get all tasks
+app.get('/taskName', (req, res) => {
+  const sql = 'SELECT name FROM tasks';
   db.query(sql, (err, results) => {
     if (err) throw err;
     res.json(results);

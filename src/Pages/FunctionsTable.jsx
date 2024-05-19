@@ -3,11 +3,13 @@ import axios from 'axios';
 
 const FunctionsTable = () => {
   const [functions, setFunctions] = useState([]);
-  const [formData, setFormData] = useState({ name: '', description: '', type: '' });
+  const [processes, setProcesses] = useState([]);
+  const [formData, setFormData] = useState({ id: null, name: '', description: '', processName: '' });
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetchFunctions();
+    fetchProcesses();
   }, []);
 
   const fetchFunctions = async () => {
@@ -19,6 +21,15 @@ const FunctionsTable = () => {
     }
   };
 
+  const fetchProcesses = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/processesNames');
+      setProcesses(response.data);
+    } catch (error) {
+      console.error('Error fetching processes:', error);
+    }
+  };  // This was missing
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -29,7 +40,7 @@ const FunctionsTable = () => {
     try {
       await axios.post('/functions', formData);
       fetchFunctions();
-      setFormData({ name: '', description: '', type: '' });
+      setFormData({ id: null, name: '', description: '', processName: '' });
     } catch (error) {
       console.error('Error adding function:', error);
     }
@@ -46,7 +57,7 @@ const FunctionsTable = () => {
       await axios.put(`/functions/${formData.id}`, formData);
       fetchFunctions();
       setIsEditing(false);
-      setFormData({ name: '', description: '', type: '' });
+      setFormData({ id: null, name: '', description: '', processName: '' });
     } catch (error) {
       console.error('Error updating function:', error);
     }
@@ -85,15 +96,20 @@ const FunctionsTable = () => {
             className="p-2 border rounded"
             required
           />
-          <input
-            type="text"
-            name="type"
-            value={formData.type}
+          <select
+            name="processName"
+            value={formData.processName}
             onChange={handleInputChange}
-            placeholder="Type"
             className="p-2 border rounded"
             required
-          />
+          >
+            <option value="">Select a Process</option>
+            {processes.map(process => (
+              <option key={process.id} value={process.id}>
+                {process.name}
+              </option>
+            ))}
+          </select>
           <button type="submit" className="p-2 bg-blue-500 text-white rounded">
             {isEditing ? 'Update' : 'Add'}
           </button>
@@ -105,7 +121,7 @@ const FunctionsTable = () => {
           <tr>
             <th className="py-2 px-4 border-b">Name</th>
             <th className="py-2 px-4 border-b">Description</th>
-            <th className="py-2 px-4 border-b">Type</th>
+            <th className="py-2 px-4 border-b">Process</th>
             <th className="py-2 px-4 border-b">Actions</th>
           </tr>
         </thead>
@@ -114,7 +130,7 @@ const FunctionsTable = () => {
             <tr key={func.id} className="text-center">
               <td className="py-2 px-4 border-b">{func.name}</td>
               <td className="py-2 px-4 border-b">{func.description}</td>
-              <td className="py-2 px-4 border-b">{func.type}</td>
+              <td className="py-2 px-4 border-b">{func.processName}</td>
               <td className="py-2 px-4 border-b">
                 <button
                   className="text-green-500 hover:underline mr-2"

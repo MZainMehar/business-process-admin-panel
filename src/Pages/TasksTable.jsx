@@ -3,11 +3,13 @@ import axios from 'axios';
 
 const TasksTable = () => {
   const [tasks, setTasks] = useState([]);
-  const [formData, setFormData] = useState({ id: null, name: '', description: '' });
+  const [processes, setProcesses] = useState([]);
+  const [formData, setFormData] = useState({ id: null, name: '', description: '', processName: ''});
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetchTasks();
+    fetchProcesses();
   }, []);
 
   const fetchTasks = async () => {
@@ -16,6 +18,15 @@ const TasksTable = () => {
       setTasks(response.data);
     } catch (error) {
       console.error('Error fetching tasks:', error);
+    }
+  };
+
+  const fetchProcesses = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/processesNames');
+      setProcesses(response.data);
+    } catch (error) {
+      console.error('Error fetching processes:', error);
     }
   };
 
@@ -29,7 +40,7 @@ const TasksTable = () => {
     try {
       const response = await axios.post('http://localhost:5000/tasks', formData);
       setTasks([...tasks, response.data]);
-      setFormData({ id: null, name: '', description: '' });
+      setFormData({ id: null, name: '', description: '', processName: ''});
     } catch (error) {
       console.error('Error adding task:', error);
     }
@@ -46,7 +57,7 @@ const TasksTable = () => {
       await axios.put(`http://localhost:5000/tasks/${formData.id}`, formData);
       setTasks(tasks.map(tsk => tsk.id === formData.id ? formData : tsk));
       setIsEditing(false);
-      setFormData({ id: null, name: '', description: '' });
+      setFormData({ id: null, name: '', description: '', processName: ''});
     } catch (error) {
       console.error('Error updating task:', error);
     }
@@ -85,6 +96,20 @@ const TasksTable = () => {
             className="p-2 border rounded"
             required
           />
+          <select
+            name="processName"
+            value={formData.roomId}
+            onChange={handleInputChange}
+            className="p-2 border rounded"
+            required
+          >
+            <option value="">Select a Process</option>
+            {processes.map(process => (
+              <option key={process.id} value={process.id}>
+                {process.name}
+              </option>
+            ))}
+          </select>
           <button type="submit" className="p-2 bg-blue-500 text-white rounded">
             {isEditing ? 'Update' : 'Add'}
           </button>
@@ -96,6 +121,7 @@ const TasksTable = () => {
           <tr>
             <th className="py-2 px-4 border-b">Name</th>
             <th className="py-2 px-4 border-b">Description</th>
+            <th className="py-2 px-4 border-b">Process</th>
             <th className="py-2 px-4 border-b">Actions</th>
           </tr>
         </thead>
@@ -104,6 +130,7 @@ const TasksTable = () => {
             <tr key={task.id} className="text-center">
               <td className="py-2 px-4 border-b">{task.name}</td>
               <td className="py-2 px-4 border-b">{task.description}</td>
+              <td className="py-2 px-4 border-b">{task.processName}</td>
               <td className="py-2 px-4 border-b">
                 <button
                   className="text-green-500 hover:underline mr-2"
